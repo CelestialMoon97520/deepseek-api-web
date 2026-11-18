@@ -1,0 +1,24 @@
+{
+  "id": "./",
+  "name": "DeepSeek_API 网页版（非官方）",
+  "short_name": "DeepSeek_API",
+  "description": "使用 DeepSeek API 的个人聊天应用",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

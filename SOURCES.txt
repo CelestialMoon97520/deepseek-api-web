@@ -1,0 +1,7 @@
+DeepSeek_API — personal web app
+
+Chat UI source: https://github.com/ckckh2023/DeepSeek-API-Chat/tree/e9b531cb0488f7330e3893b4ee724749fc8e0ca9
+Chat UI build: https://github.com/ckckh2023/DeepSeek-API-Chat/releases/download/v1.1.2/DeepSeek.API.Chat_v1.1.2_armv8a.apk
+History search: https://raw.githubusercontent.com/darrindeyoung791/ds-api-demo-hotkeys/d87a5deb4f49aadb7131f59fe251c1c8ef277126/src/services/chat/search.ts
+Local adaptations: storage names, default thinking state, home screen and offline shell, interactive drawer, and in-chat reading controls.
+Open-source upstream: https://github.com/deepseek-ai/chat-demo

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+    <title>使用和数据说明 · DeepSeek_API</title>
+    <style>
+      body { max-width: 42rem; margin: 2rem auto; padding: 0 1.25rem; font: 16px/1.7 system-ui, sans-serif; }
+      h1 { font-size: 1.65rem; }
+      h2 { font-size: 1.15rem; margin-top: 1.75rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="./">返回聊天</a>
+      <h1>DeepSeek_API 网页版</h1>
+      <p>这是基于 DeepSeek 开源 chat-demo 的非官方项目。回复由 AI 生成，请核实重要内容。软件按 MIT 许可证原样提供。</p>
+
+      <h2>API Key 和费用</h2>
+      <p>请使用自己的 DeepSeek 开放平台 API Key。请求直接发往 DeepSeek，费用计入你的开放平台账号。网页代码会读取 Key 来发送请求，浏览器内可访问该站点数据的脚本也可能读取它。可以为此项目单独创建一个 Key，并在开放平台查看用量或撤销。</p>
+
+      <h2>数据保存位置</h2>
+      <p>Key 和设置保存在当前浏览器的 localStorage。会话和附件保存在 IndexedDB。换浏览器、设备或站点地址时，需要重新录入 Key，并可用聊天 ZIP 迁移会话。清除站点数据可能删除本地记录。</p>
+
+      <h2>哪些数据会联网</h2>
+      <p>GitHub Pages 提供静态网页文件。网页没有作者运营的 API 中转、聊天云同步或遥测。发送消息、上传附件、语音转写和朗读时，相应数据会传给 DeepSeek。对话中的外部图片也可能由浏览器直接加载。</p>
+      <p>聊天 ZIP 包含会话及可用的本地图片，排除单独保存的 Key、应用设置和非图片附件原件。直接写在消息里的内容仍会随会话导出。确认导入前请先备份当前聊天，导入会替换本地会话。</p>
+      <p><a href="https://github.com/deepseek-ai/chat-demo/blob/main/README.zh-CN.md">上游项目与数据说明</a> · <a href="https://cdn.deepseek.com/policies/zh-CN/deepseek-open-platform-terms-of-service.html">DeepSeek 开放平台服务协议</a> · <a href="https://cdn.deepseek.com/policies/zh-CN/deepseek-open-platform-privacy-policy.html">DeepSeek 开放平台隐私政策</a></p>
+    </main>
+  </body>
+</html>

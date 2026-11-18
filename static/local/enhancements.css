@@ -1,0 +1,132 @@
+.local-history-entry {
+  flex-shrink: 0;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.local-history-entry:focus-visible,
+.local-history button:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary, #4d6bfe);
+  outline-offset: -2px;
+}
+
+.local-history {
+  width: min(480px, calc(100vw - 24px));
+  box-sizing: border-box;
+  max-height: min(70dvh, 620px);
+  margin: 8dvh auto auto;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px;
+  background: var(--dsw-alias-bg-base, Canvas);
+  color: var(--dsw-alias-label-primary, CanvasText);
+  box-shadow: 0 12px 48px #0003;
+}
+
+.local-history[open] { display: flex; flex-direction: column; }
+.local-history::backdrop { background: #0004; }
+.local-history-header { display: flex; gap: 8px; }
+
+.local-history-header input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-3);
+  color: inherit;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.local-history-header button,
+.local-history-result {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.local-history-header button { width: 40px; font-size: 1.25rem; }
+.local-history-status:not(:empty) { margin: 12px 6px 2px; font-size: 0.875rem; }
+.local-history-results { overflow: auto; overscroll-behavior: contain; }
+
+.local-history-result {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.local-history-result:hover { background: var(--dsw-specific-sidebar-nav-item-hover); }
+.local-history-result span { font-size: 0.875rem; }
+.local-history-result mark { color: inherit; background: #7897ed42; }
+.local-history-highlight { outline: 2px solid #7194fa; outline-offset: -2px; border-radius: 8px; }
+
+/* Keep the composer on one row; the switch labels fade out at the seam instead of wrapping. */
+.functionRow-ed6f47 { flex-wrap: nowrap; }
+.toggles-ed6f47 {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  flex-wrap: nowrap;
+  max-inline-size: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+}
+.collapsedToggles-ed6f47 .toggleLabel-ed6f47 { display: inline; }
+
+@media (max-width: 767px) {
+  .toggles-ed6f47 { gap: 6px; }
+  .toggle-ed6f47 { padding-inline: 8px; }
+
+  /* Keep the action cluster compact so the send button clears the card edge. */
+  .right-ed6f47 { gap: 2px; }
+  .sendButton-ed6f47 {
+    width: 30px;
+    height: 30px;
+    margin-left: 2px;
+  }
+
+  .app-frame {
+    --local-snap: 210ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --local-panel-width: min(300px, calc(100% - 48px));
+  }
+  .app-frame > [data-local-drawer-open] {
+    z-index: 0;
+    transform: none;
+    transition: none;
+  }
+  .app-frame > [data-local-drawer-open] > [class^="sider-"] { border-radius: 0; }
+  .app-frame > main {
+    z-index: 1;
+    background-color: var(--dsw-alias-bg-base, Canvas);
+    transition: transform var(--local-snap);
+  }
+  .app-frame > [class^="drawerMask-"] {
+    z-index: 2;
+    background-color: transparent;
+    transition: transform var(--local-snap);
+  }
+  .app-frame:is(:has(> [data-local-drawer-open="true"]), [data-local-drawer]) > :is(main, [class^="drawerMask-"]) {
+    transform: translate3d(var(--local-drawer-distance, var(--local-panel-width)), 0, 0);
+  }
+  .app-frame[data-local-drawer="drag"] > :is(main, [class^="drawerMask-"]) {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-frame { --local-snap: 0ms linear; }
+}
