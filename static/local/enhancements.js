@@ -1,4 +1,55 @@
 // MIT history search: https://github.com/darrindeyoung791/ds-api-demo-hotkeys/d87a5deb4f49aadb7131f59fe251c1c8ef277126
+/* Apply the saved text size before the app renders, so the first paint is stable. */
+(() => {
+  'use strict';
+
+  const KEY = 'chat-demo:local-font-size';
+  const STEPS = [0.85, 0.9, 1, 1.4, 1.8];
+  const BASE = 16;
+  const meta = document.querySelector('meta[name="system-font-scale"]');
+  const native = meta ? Number(meta.getAttribute('content')) : NaN;
+  const nativeScale = Number.isFinite(native) && native >= 0.5 && native <= 3 ? native : null;
+  const chinese = () => (document.documentElement.lang || '').toLowerCase().startsWith('zh');
+  const labels = () => (chinese()
+    ? ['最小', '较小', '标准', '较大', '最大']
+    : ['Smallest', 'Smaller', 'Standard', 'Larger', 'Largest']);
+  const fallback = () => ({ follow: true, step: 3 });
+  const normalize = (value) => (value && typeof value.follow === 'boolean'
+    && Number.isInteger(value.step) && value.step >= 1 && value.step <= STEPS.length
+    ? { follow: value.follow, step: value.step }
+    : fallback());
+  const read = () => {
+    try {
+      return normalize(JSON.parse(localStorage.getItem(KEY)));
+    } catch {
+      return fallback();
+    }
+  };
+  const save = (state) => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      // Storage can be unavailable in private modes; the size still applies for this page.
+    }
+  };
+  const scaleOf = (state) => (state.follow
+    ? (nativeScale === null ? 1 : nativeScale)
+    : STEPS[state.step - 1]);
+  const apply = (state) => {
+    const root = document.documentElement;
+    if (state.follow && nativeScale === null) {
+      // The browser default already follows the system setting; do not override it.
+      root.style.removeProperty('font-size');
+    } else {
+      root.style.fontSize = `${(BASE * scaleOf(state)).toFixed(2)}px`;
+    }
+  };
+
+  const initial = read();
+  apply(initial);
+  window.__localFontSize = { KEY, STEPS, labels, read, save, apply, scaleOf, nativeScale, chinese };
+})();
+
 window.addEventListener('deepseek-local-ready', ({ detail }) => {
     const { getVisibleMessages, db, useChatStore } = detail;
     // Same plain-text projection used by both upstream chat clients.
@@ -407,6 +458,148 @@ function mountDrawerDrag({ drawer, openDrawer, closeDrawer, overlayOpen }) {
   }, { passive: true });
 }
 
+function mountFontSize() {
+  const api = window.__localFontSize;
+  if (!api || document.querySelector('dialog.local-font-size')) return;
+
+  const t = (zh, en) => (api.chinese() ? zh : en);
+  let state = api.read();
+  let entryButton = null;
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'local-font-size';
+  dialog.setAttribute('aria-label', t('字体大小', 'Font size'));
+
+  const header = document.createElement('div');
+  header.className = 'local-font-header';
+  const title = document.createElement('h2');
+  title.textContent = t('字体大小', 'Font size');
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'local-font-close';
+  close.setAttribute('aria-label', t('关闭', 'Close'));
+  close.textContent = '×';
+  close.addEventListener('click', () => dialog.close());
+  header.append(title, close);
+
+  const preview = document.createElement('div');
+  preview.className = 'local-font-preview';
+  const bubble = document.createElement('div');
+  bubble.className = 'local-font-bubble';
+  bubble.textContent = t('预览文字大小', 'Preview text size');
+  const hint = document.createElement('p');
+  hint.textContent = t('拖动滑块调整界面文字大小，设置保存在本机。',
+    'Drag the slider to resize the interface text. The setting is saved on this device.');
+  const note = document.createElement('p');
+  note.textContent = t('开启「跟随系统」时使用系统字体大小，滑块不可用。',
+    'Turn on “Follow system” to use the device text size; the slider is then inactive.');
+  preview.append(bubble, hint, note);
+
+  const followRow = document.createElement('div');
+  followRow.className = 'local-font-row';
+  const followLabel = document.createElement('span');
+  followLabel.textContent = t('跟随系统', 'Follow system');
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'local-font-switch';
+  toggle.setAttribute('role', 'switch');
+  toggle.setAttribute('aria-label', t('跟随系统', 'Follow system'));
+  toggle.addEventListener('click', () => {
+    state = { follow: !state.follow, step: state.step };
+    commit();
+  });
+  followRow.append(followLabel, toggle);
+
+  const slider = document.createElement('input');
+  slider.className = 'local-font-slider';
+  slider.type = 'range';
+  slider.min = '1';
+  slider.max = String(api.STEPS.length);
+  slider.step = '1';
+  slider.setAttribute('aria-label', t('字体大小', 'Font size'));
+  slider.addEventListener('input', () => {
+    state = { follow: state.follow, step: Number(slider.value) };
+    commit();
+  });
+
+  const ticks = document.createElement('div');
+  ticks.className = 'local-font-ticks';
+  for (let index = 0; index < api.STEPS.length; index += 1) ticks.append(document.createElement('i'));
+
+  const scaleRow = document.createElement('div');
+  scaleRow.className = 'local-font-scale';
+  const small = document.createElement('span');
+  small.className = 'local-font-a-small';
+  small.textContent = 'A';
+  const standard = document.createElement('span');
+  standard.textContent = t('标准', 'Standard');
+  const large = document.createElement('span');
+  large.className = 'local-font-a-large';
+  large.textContent = 'A';
+  scaleRow.append(small, standard, large);
+
+  dialog.append(header, preview, followRow, slider, ticks, scaleRow);
+  document.body.append(dialog);
+
+  function commit() {
+    api.save(state);
+    api.apply(state);
+    refresh();
+  }
+
+  function refresh() {
+    toggle.setAttribute('aria-checked', String(state.follow));
+    slider.value = String(state.step);
+    slider.disabled = state.follow;
+    const value = state.follow ? t('跟随系统', 'Follow system') : api.labels()[state.step - 1];
+    if (entryButton) entryButton.textContent = value;
+  }
+
+  function open() {
+    state = api.read();
+    refresh();
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function settingsDialog() {
+    for (const candidate of document.querySelectorAll('[role="dialog"]')) {
+      if (candidate.classList.contains('local-font-size')) continue;
+      const heading = candidate.querySelector('[class*="title-"]');
+      const text = heading ? heading.textContent.trim() : '';
+      if (text === '设置' || text === 'Settings') return candidate;
+    }
+    return null;
+  }
+
+  function injectEntry() {
+    const host = settingsDialog();
+    if (!host || host.querySelector('.local-font-entry')) return;
+    const template = [...host.querySelectorAll('[class*="row-"]')]
+      .find((row) => /主题|Theme/.test(row.textContent));
+    if (!template) return;
+    const row = document.createElement('div');
+    row.className = `${template.className} local-font-entry`;
+    const label = document.createElement('div');
+    if (template.firstElementChild) label.className = template.firstElementChild.className;
+    label.textContent = t('字体大小', 'Font size');
+    const button = document.createElement('button');
+    button.type = 'button';
+    const trigger = template.querySelector('button');
+    if (trigger) button.className = trigger.className;
+    button.textContent = state.follow ? t('跟随系统', 'Follow system') : api.labels()[state.step - 1];
+    button.addEventListener('click', open);
+    row.append(label, button);
+    template.after(row);
+    entryButton = button;
+  }
+
+  const observer = new MutationObserver(injectEntry);
+  observer.observe(document.body, { childList: true, subtree: true });
+  injectEntry();
+  refresh();
+}
+
     mountHistorySearch({ ...detail, collectHistoryIndex, searchHistory });
     mountDrawerDrag(detail);
+    mountFontSize();
 }, { once: true });
