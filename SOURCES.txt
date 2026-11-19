@@ -5,3 +5,4 @@ Chat UI build: https://github.com/ckckh2023/DeepSeek-API-Chat/releases/download/
 History search: https://raw.githubusercontent.com/darrindeyoung791/ds-api-demo-hotkeys/d87a5deb4f49aadb7131f59fe251c1c8ef277126/src/services/chat/search.ts
 Local adaptations: storage names, default thinking state, home screen and offline shell, interactive drawer, and in-chat reading controls.
 Open-source upstream: https://github.com/deepseek-ai/chat-demo
+Attachment and reply-link fixes (MIT): https://github.com/deepseek-ai/chat-demo/commit/4ee2972e53da778db0191d0312938291e97f2a81

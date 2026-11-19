@@ -74,6 +74,22 @@
 .local-history-result mark { color: inherit; background: #7897ed42; }
 .local-history-highlight { outline: 2px solid #7194fa; outline-offset: -2px; border-radius: 8px; }
 
+.local-file-link { position: absolute; inset: 0; }
+.local-file-thumbnail { display: block; width: 100%; height: 100%; }
+.local-attachment-view {
+  box-sizing: border-box;
+  width: min(720px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px;
+  background: var(--dsw-alias-bg-base, Canvas);
+  color: var(--dsw-alias-label-primary, CanvasText);
+}
+.local-attachment-view::backdrop { background: #0008; }
+.local-attachment-view > button { display: block; margin: 0 0 8px auto; font: inherit; }
+.local-attachment-view > img { display: block; max-width: 100%; max-height: calc(100dvh - 90px); margin: auto; }
+
 /* Keep the composer on one row; the switch labels fade out at the seam instead of wrapping. */
 .functionRow-ed6f47 { flex-wrap: nowrap; }
 .toggles-ed6f47 {

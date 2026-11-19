@@ -50,6 +50,125 @@
   window.__localFontSize = { KEY, STEPS, labels, read, save, apply, scaleOf, nativeScale, chinese };
 })();
 
+// Attachment view and reply URL rules adapted from DeepSeek chat-demo v0.1.2 (MIT).
+// https://github.com/deepseek-ai/chat-demo/commit/4ee2972e53da778db0191d0312938291e97f2a81
+(() => {
+  'use strict';
+
+  const viewTypes = Object.freeze({
+    png: 'image/png', apng: 'image/png',
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', jpe: 'image/jpeg', jfif: 'image/jpeg',
+    pjp: 'image/jpeg', pjpeg: 'image/jpeg',
+    gif: 'image/gif', webp: 'image/webp', bmp: 'image/bmp', dib: 'image/bmp',
+    ico: 'image/x-icon', cur: 'image/x-icon', avif: 'image/avif', avifs: 'image/avif',
+    tif: 'image/tiff', tiff: 'image/tiff', heic: 'image/heic', heif: 'image/heif',
+    svg: 'image/svg+xml', pdf: 'application/pdf',
+  });
+
+  const getViewType = (name) => {
+    const dot = name.lastIndexOf('.');
+    const extension = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
+    return Object.hasOwn(viewTypes, extension) ? viewTypes[extension] : 'application/octet-stream';
+  };
+
+  const isImageName = (name) => getViewType(name).startsWith('image/');
+
+  const isWebUrl = (value) => {
+    if (typeof value !== 'string') return false;
+    try {
+      return ['http:', 'https:'].includes(new URL(value).protocol);
+    } catch {
+      return false;
+    }
+  };
+
+  const readDataUrl = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+  const showImage = (blob, name) => {
+    const url = URL.createObjectURL(blob);
+    const dialog = document.createElement('dialog');
+    dialog.className = 'local-attachment-view';
+    dialog.setAttribute('aria-label', name);
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = document.documentElement.lang.startsWith('zh') ? '关闭' : 'Close';
+    close.addEventListener('click', () => dialog.close());
+    const image = document.createElement('img');
+    image.alt = name;
+    image.src = url;
+    dialog.append(close, image);
+    dialog.addEventListener('close', () => {
+      URL.revokeObjectURL(url);
+      dialog.remove();
+    }, { once: true });
+    document.body.append(dialog);
+    dialog.showModal();
+  };
+
+  const useFileView = (react, source, name, loadFile) => {
+    const type = getViewType(name);
+    const [state, setState] = react.useState(null);
+    react.useEffect(() => {
+      let active = true;
+      let objectUrl;
+      void (async () => {
+        try {
+          const original = typeof source === 'string' ? await loadFile(source) : source;
+          if (!active) return;
+          if (!original) {
+            setState({ source, type, url: null });
+            return;
+          }
+          const blob = original.slice(0, original.size, type);
+          const url = type === 'image/svg+xml' ? await readDataUrl(blob) : (objectUrl = URL.createObjectURL(blob));
+          if (active) setState({ source, type, url, blob });
+        } catch {
+          if (active) setState({ source, type, url: null });
+        }
+      })();
+      return () => {
+        active = false;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      };
+    }, [source, type, loadFile]);
+
+    const view = state?.source === source && state.type === type ? state : undefined;
+    const url = view?.url;
+    const image = type.startsWith('image/');
+    if (!url) return { url, image };
+
+    const raster = image && type !== 'image/svg+xml';
+    const pdf = type === 'application/pdf';
+    const link = { href: url, title: name, 'aria-label': name };
+    const android = window.DeepSeekAndroidExport;
+    if (android) {
+      link.href = '#';
+      link.onClick = (event) => {
+        event.preventDefault();
+        if (raster) {
+          showImage(view.blob, name);
+        } else if (!android.offerAttachment(view.blob, name, pdf)) {
+          window.alert(document.documentElement.lang.startsWith('zh')
+            ? '暂时无法保存附件，请稍后重试。' : 'Unable to save the attachment. Try again.');
+        }
+      };
+    } else if (raster || pdf) {
+      link.target = '_blank';
+      link.rel = 'noreferrer';
+    } else {
+      link.download = name;
+    }
+    return { url, image, link };
+  };
+
+  window.DeepSeekContent = Object.freeze({ isImageName, isWebUrl, useFileView });
+})();
+
 window.addEventListener('deepseek-local-ready', ({ detail }) => {
     const { getVisibleMessages, db, useChatStore } = detail;
     // Same plain-text projection used by both upstream chat clients.
