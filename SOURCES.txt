@@ -6,3 +6,4 @@ History search: https://raw.githubusercontent.com/darrindeyoung791/ds-api-demo-h
 Local adaptations: storage names, default thinking state, home screen and offline shell, interactive drawer, and in-chat reading controls.
 Open-source upstream: https://github.com/deepseek-ai/chat-demo
 Attachment and reply-link fixes (MIT): https://github.com/deepseek-ai/chat-demo/commit/4ee2972e53da778db0191d0312938291e97f2a81
+Blue whale artwork: https://raw.githubusercontent.com/deepseek-ai/DeepSeek-LLM/6712a86bfb7dd25c73383c5ad2eb7a8db540258b/images/logo.svg

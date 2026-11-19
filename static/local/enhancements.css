@@ -285,3 +285,9 @@
 
 .local-font-scale .local-font-a-small { font-size: 0.75rem; }
 .local-font-scale .local-font-a-large { font-size: 1.125rem; }
+
+.local-welcome-whale {
+  display: block;
+  flex: none;
+  margin-block-end: 12px;
+}
